@@ -15,7 +15,7 @@ os.makedirs('files', exist_ok=True)
 def get_service_account_key():
     secret_client = secretmanager.SecretManagerServiceClient()
     secret_name = "projects/cloudnative12/secrets/storageSecret1/versions/latest"
-    response = secret_client.access_secret_version(name=secret_name)
+    response = secret_client.access_secret_version(request={"name": secret_name})
     service_account_key = response.payload.data.decode("UTF-8")
     return json.loads(service_account_key)
 
@@ -23,7 +23,7 @@ def get_service_account_key():
 def get_gemini_api_key():
     secret_client = secretmanager.SecretManagerServiceClient()
     secret_name = "projects/cloudnative12/secrets/geminiSecret/versions/latest"
-    response = secret_client.access_secret_version(name=secret_name)
+    response = secret_client.access_secret_version(request={"name": secret_name})
     gemini_api_key = response.payload.data.decode("UTF-8")
     return gemini_api_key
 
@@ -150,4 +150,4 @@ def upload_blob(bucket_name, file, blob_name, user_id):
     print(f"Uploaded blob '{blob_name}' to '{bucket_name}/{user_id}'.")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True,port=int(os.environ.get("PORT", 8080)))
+    app.run(port=8080, debug=True)
