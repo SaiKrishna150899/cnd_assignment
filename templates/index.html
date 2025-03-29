@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cloud Image Gallery</title>
+    <style>
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial;
+        }
+
+        .upload-form {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            max-width: 500px;
+            margin: 100px auto;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .modal img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+
+        .close-btn {
+            background: red;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Cloud Image Gallery</h1>
+
+    <div class="upload-form">
+        <form method="post" enctype="multipart/form-data" action="/upload">
+            <input type="file" name="form_file" accept="image/*" required>
+            <button type="submit" style="margin-top: 10px;">Upload Image</button>
+        </form>
+    </div>
+
+    <div class="gallery">
+        {% for image in images %}
+        <div class="card">
+            <img src="{{ url_for('files', user_id=image.name.split('/')[0], filename=image.name.split('/')[1]) }}"
+                class="image"
+                onclick="openModal('{{ image.name }}', '{{ image.metadata.title | default('Untitled Image') }}', '{{ image.metadata.description | default('Description not available') }}')">
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <img id="modalImage" src="" alt="">
+            <p id="modalDescription"></p>
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function openModal(imageSrc, title, description) {
+            document.getElementById("modalTitle").textContent = title;
+            document.getElementById("modalImage").src = "{{ url_for('files', user_id='USER_ID', filename='FILENAME') }}".replace("USER_ID", imageSrc.split('/')[0]).replace("FILENAME", imageSrc.split('/')[1]);
+            document.getElementById("modalDescription").textContent = description;
+            document.getElementById("imageModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+    </script>
+</body>
+
+</html>
