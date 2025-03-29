@@ -1,16 +1,15 @@
-FROM python:3.10-slim
+# Use the official Python image
+FROM python:3.11-slim
 
+# Set environment variables
+ENV PYTHONUNBUFFERED True
+
+# Copy application code
+COPY . /app
 WORKDIR /app
 
-COPY requirements.txt .
-
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-
-EXPOSE 8080
-
-ENV FLASK_APP = main.py
-ENV FLASK_ENV = production
-
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
+# Run the web service using gunicorn
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
