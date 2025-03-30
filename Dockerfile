@@ -1,41 +1,24 @@
-# Use official Python image
+# Use the official Python image as the base image
 FROM python:3.10-slim
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=True \
-    PORT=8080 \
-    GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcs_credentials.json
-
-# Install system dependencies required for Google Cloud SDK
-RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy requirements first to leverage Docker cache
+# Copy the requirements file into the container
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy the rest of the application code into the container
 COPY . .
 
-# Set proper permissions for runtime files
-RUN chmod a+x /app/main.py
-
-# Expose the port Cloud Run requires
+# Expose port 8080 for the Flask application
 EXPOSE 8080
 
-# Configure entrypoint with proper Gunicorn settings
-CMD exec gunicorn --bind :$PORT \
-    --workers 2 \
-    --threads 8 \
-    --timeout 120 \
-    --access-logfile - \
-    --error-logfile - \
-    --preload \
-    main:app
+# Set the environment variable for Flask
+ENV FLASK_APP=main.py
+ENV FLASK_ENV=production
+
+# Run the Flask application using Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
